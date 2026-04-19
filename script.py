@@ -1,6 +1,7 @@
 import asyncio
 import sqlite3
 import re
+import os
 from datetime import datetime, timedelta
 
 from aiogram import Bot, Dispatcher, types
@@ -15,12 +16,11 @@ from openai import OpenAI
 from openpyxl import Workbook
 from rapidfuzz import fuzz
 
-
 # НАСТРОЙКИ
 
-TELEGRAM_TOKEN = ''
-API_KEY = ''
-ADMIN_ID = 1447915435
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+API_KEY = os.getenv("API_KEY")
+ADMIN_ID = 1447915435 
 
 client = OpenAI(
     base_url="https://models.inference.ai.azure.com",
