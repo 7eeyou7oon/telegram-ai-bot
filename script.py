@@ -18,9 +18,23 @@ from rapidfuzz import fuzz
 
 # НАСТРОЙКИ
 
+from aiohttp import web
+
+async def handle(request):
+    return web.Response(text="Bot is running")
+
+async def start_web():
+    app = web.Application()
+    app.router.add_get("/", handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", 10000)
+    await site.start()
+
+
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 API_KEY = os.getenv("API_KEY")
-ADMIN_ID = 1447915435 
+ADMIN_ID = 1447915435  # 👈 ВСТАВЬ СВОЙ ID
 
 client = OpenAI(
     base_url="https://models.inference.ai.azure.com",
@@ -754,7 +768,11 @@ async def chat(m: types.Message):
 async def main():
     init_db()
     print("Бот запущен 🚀")
-    await dp.start_polling(bot)
+
+    await asyncio.gather(
+        dp.start_polling(bot),
+        start_web()
+    )
 
 if __name__ == "__main__":
     asyncio.run(main())
