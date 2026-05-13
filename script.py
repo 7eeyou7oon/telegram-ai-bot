@@ -25,7 +25,38 @@ async def handle(request):
 
 async def start_web():
     app = web.Application()
+
+    async def create_order(request):
+        data = await request.json()
+
+        name = data.get("name")
+        phone = data.get("phone")
+        service = data.get("service")
+        comment = data.get("comment", "")
+
+        save_to_db(
+            name,
+            phone,
+            service,
+            "С сайта",
+            "-"
+        )
+
+        text = (
+            f"🔥 Новая заявка с сайта\n\n"
+            f"👤 Имя: {name}\n"
+            f"📱 Телефон: {phone}\n"
+            f"📦 Услуга: {service}\n"
+            f"💬 Комментарий: {comment}"
+        )
+
+        await bot.send_message(ADMIN_ID, text)
+
+        return web.json_response({
+            "status": "success"
+        })
     app.router.add_get("/", handle)
+    app.router.add_post("/create-order", create_order)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", 10000)
@@ -282,8 +313,49 @@ knowledge_base = {
     "Мониторы": {
         "text": "В наличии мониторы — от 5 000 тг.",
         "aliases": ["экран", "дисплей"]
+    },
+
+    "Зарядные устройства для ноутбуков": {
+        "text": "Зарядные устройства для ноутбуков — от 6000 тг.",
+        "aliases": [
+            "зарядка для ноутбука",
+            "блок питания ноутбука",
+            "адаптер ноутбука",
+            "зарядное устройство"
+        ]
+    },
+
+    "Ноутбуки": {
+        "text": "Ноутбуки в наличии — от 39000 тг.",
+        "aliases": [
+            "купить ноутбук",
+            "ноут",
+            "лэптоп",
+            "ноутбуки"
+        ]
+    },
+
+    "Заправка и расчиповка принтеров": {
+        "text": "Заправка и расчиповка принтеров — 1500 тг.",
+        "aliases": [
+            "заправка принтера",
+            "расчиповка",
+            "заправить картридж",
+            "принтер не печатает"
+        ]
+    },
+
+    "Принтеры": {
+        "text": "Принтеры в наличии — от 25000 тг.",
+        "aliases": [
+            "купить принтер",
+            "мфу",
+            "лазерный принтер",
+            "струйный принтер"
+        ]
     }
 }
+
 
 
 # HYBRID SEARCH
