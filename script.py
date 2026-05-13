@@ -20,14 +20,21 @@ from rapidfuzz import fuzz
 
 from aiohttp import web
 
+# =====================
+# WEB
+# =====================
+
 async def handle(request):
     return web.Response(text="Bot is running")
 
-async def start_web():
-    app = web.Application()
 
-    async def create_order(request):
+async def create_order(request):
+
+    try:
+
         data = await request.json()
+
+        print("NEW ORDER:", data)
 
         name = data.get("name")
         phone = data.get("phone")
@@ -55,12 +62,38 @@ async def start_web():
         return web.json_response({
             "status": "success"
         })
+
+    except Exception as e:
+
+        print("CREATE ORDER ERROR:", e)
+
+        return web.json_response({
+            "status": "error",
+            "message": str(e)
+        }, status=500)
+
+
+async def start_web():
+
+    app = web.Application()
+
     app.router.add_get("/", handle)
+
     app.router.add_post("/create-order", create_order)
+
     runner = web.AppRunner(app)
+
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", 10000)
+
+    site = web.TCPSite(
+        runner,
+        "0.0.0.0",
+        10000
+    )
+
     await site.start()
+
+    print("WEB SERVER STARTED 🚀")
 
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
