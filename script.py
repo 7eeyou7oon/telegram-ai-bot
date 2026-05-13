@@ -433,17 +433,28 @@ kb = ReplyKeyboardMarkup(
 
 
 def catalog():
-    buttons = [
-        [InlineKeyboardButton(text=k, callback_data=f"s:{k}")]
-        for k in knowledge_base.keys()
-    ]
 
-    # добавляем кнопку "Главное меню" отдельной строкой
+    buttons = []
+
+    for i, key in enumerate(knowledge_base.keys()):
+
+        buttons.append([
+            InlineKeyboardButton(
+                text=key,
+                callback_data=f"s:{i}"
+            )
+        ])
+
     buttons.append([
-        InlineKeyboardButton(text="🏠 Главное меню", callback_data="home")
+        InlineKeyboardButton(
+            text="🏠 Главное меню",
+            callback_data="home"
+        )
     ])
 
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
+    return InlineKeyboardMarkup(
+        inline_keyboard=buttons
+    )
 
 def confirm_kb():
     return ReplyKeyboardMarkup(
@@ -556,18 +567,38 @@ async def home_handler(call: types.CallbackQuery):
 
 @dp.callback_query(lambda c: c.data.startswith("s:"))
 async def service(call: types.CallbackQuery):
+
     uid = call.from_user.id
-    key = call.data.split(":")[1]
+
+    index = int(call.data.split(":")[1])
+
+    key = list(knowledge_base.keys())[index]
 
     user_state[uid] = "confirm"
     user_last_service[uid] = key
 
-    # 👇 ВОТ ЗДЕСЬ inline кнопки
-    kb_inline = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📞 Оставить заявку", callback_data=f"o:{key}")],
-        [InlineKeyboardButton(text="🔙 Назад", callback_data="back")],
-        [InlineKeyboardButton(text="🏠 Главное меню", callback_data="home")]
-    ])
+    kb_inline = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="📞 Оставить заявку",
+                    callback_data=f"o:{index}"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="🔙 Назад",
+                    callback_data="back"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="🏠 Главное меню",
+                    callback_data="home"
+                )
+            ]
+        ]
+    )
 
     await call.message.answer(
         f"📦 {key}\n\n💡 {knowledge_base[key]['text']}\n\nПодходит ли вам услуга?",
@@ -582,9 +613,14 @@ async def service(call: types.CallbackQuery):
 
 @dp.callback_query(lambda c: c.data.startswith("o:"))
 async def order(call):
+
+    index = int(call.data.split(":")[1])
+
+    key = list(knowledge_base.keys())[index]
+
     user_contacts[call.from_user.id] = {
         "step": "name",
-        "service": call.data.split(":")[1]
+        "service": key
     }
 
     await call.message.answer("Введите имя:")
