@@ -2,3 +2,4 @@ aiogram
 openai
 openpyxl
 rapidfuzz
+pymysql
